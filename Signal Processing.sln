@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31105.61
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Signal Processing", "Signal Processing\Signal Processing.pyproj", "{67E1BBBA-E943-4933-9A42-7172D2609578}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67E1BBBA-E943-4933-9A42-7172D2609578}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67E1BBBA-E943-4933-9A42-7172D2609578}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		Qt5Version = 5.15.2_msvc2019_64
+		SolutionGuid = {7FE8D948-8519-4C8E-9E7B-2F22AF58045B}
+	EndGlobalSection
+EndGlobal
