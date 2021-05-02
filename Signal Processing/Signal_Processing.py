@@ -10,6 +10,7 @@ from PySide2.QtUiTools import QUiLoader
 from matplotlib.backends.backend_qt5agg import FigureCanvas ,  NavigationToolbar2QT  as  NavigationToolbar
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as Navi
 from matplotlib.figure import Figure
+from matplotlib.ticker import FuncFormatter, MultipleLocator
 from scipy import signal
 import matplotlib.pyplot as plot
 
@@ -87,7 +88,7 @@ class MplWidget(QWidget):
         #plot.show()
 # ------------------ MainWidget ------------------
 class MainWidget(QWidget):
-    
+    coef = 0
     def __init__(self):
         
         QWidget.__init__(self)
@@ -101,12 +102,16 @@ class MainWidget(QWidget):
         loader.registerCustomWidget(MplWidget)
         self.ui = loader.load(designer_file, self)
 
+        global coef
+        self.coef = 1
+        print("MainWidget")
         self.update_graph()
 
         designer_file.close()
 
-        self.ui.pushButton.clicked.connect(self.update_graph)
+        #self.ui.pushButton.clicked.connect(self.update_graph)
 
+        self.ui.updateBtn.clicked.connect(self.preUpdate)
 
         self.setWindowTitle("PySide2 & Matplotlib Example GUI")
 
@@ -118,9 +123,15 @@ class MainWidget(QWidget):
         #yaxis = np.array([4, 9])
         #self.ui.MplWidget.canvas.axes.plot(xaxis, yaxis)
         
+    def preUpdate(self):
+       
+        self.coef = self.ui.periodSpin.value()
+       
+        print("preUpdate "+str(self.coef))
+        self.update_graph()
 
     def update_graph(self):
-            
+            print("update_graph "+str(self.coef))
             fs = 500
             f = random.randint(1, 100) 
             ts = 1/fs 
@@ -142,15 +153,23 @@ class MainWidget(QWidget):
             canv = MatplotlibCanvas(self)
             canv = self.ui.MplWidget.canvas
             toolbar = Navi(canv,centralwidget)
+            #toolbar.resize(200,100)
+            toolbar.setFixedHeight(25)
             self.ui.horizontalLayout.addWidget(toolbar)
             canv.axes.clear() 
             #self.ui.MplWidget.canvas.axes.plot( t ,  cosinus_signal )   #plot takes 2 parameters, 1 for x axis, 2 for y axis 
             #self.ui.MplWidget.canvas.axes.plot( t ,  sinus_signal ) 
             tt = np.arange(0.0,2.0,0.01)
             ss = 1 + np.sin(2* np.pi * tt)
-            x = np.linspace(-np.pi, np.pi, 100)
+            #x = np.linspace(-np.pi, np.pi, 100)
+            #y = 2*np.sin(x)
+
+            #x = np.linspace(-5*np.pi,5*np.pi,100)
+            #y = np.sin(x)/x
+            print(str(self.coef)+' COEF')
+            x = np.linspace(-np.pi*self.coef, np.pi*self.coef, 100)
             y = 2*np.sin(x)
-            canv.axes.plot(tt,ss)
+            canv.axes.plot(x,y)
             #self.ui.MplWidget.canvas.axes.plot(t, signal.square(2 * np.pi * 5 * t))
             canv.axes.legend(('cosinus', 'sinus'), loc = 'upper right')
             canv.axes.set_title(' Cosinus - Sinus Signals')
@@ -169,9 +188,21 @@ class MainWidget(QWidget):
             canv.axes.xaxis.set_ticks_position('bottom')
             canv.axes.yaxis.set_ticks_position('left')
 
+            #canv.axes.set_xlim(-np.pi, np.pi)
+
+            #canv.axes.set_ylim(bottom=0)
+            #canv.axes.set_xlim(xmin=0)
+
+            #canv.axes.axhline(color='red', lw=0.5)
+            #canv.axes.axvline(color='green', lw=0.5)
+
+
+            canv.axes.xaxis.set_major_formatter(FuncFormatter(
+             lambda val,pos: '{:.0g}$\pi$'.format(val/np.pi) if val !=0 else '0'))
+            canv.axes.xaxis.set_major_locator(MultipleLocator(base=np.pi))
             canv.axes.grid(True)
             canv.draw()
-            #canv.figure.tight_layout()
+            canv.figure.tight_layout()
             
 
 
