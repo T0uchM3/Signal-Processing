@@ -11,6 +11,7 @@
     <Name>Signal Processing</Name>
     <RootNamespace>Signal Processing</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
+    <TestFramework>unittest</TestFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

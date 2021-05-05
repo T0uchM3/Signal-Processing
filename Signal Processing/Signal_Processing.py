@@ -1,6 +1,5 @@
 import sys
 import os
-
 from PySide2.QtWidgets import *
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtUiTools import QUiLoader
@@ -17,46 +16,15 @@ import matplotlib.pyplot as plot
 import  numpy  as  np 
 import  random
 from PySide2.QtWidgets import QApplication
-#loader = QUiLoader()
-#app = QtWidgets.QApplication(sys.argv)
-#window = loader.load("form.ui", None)
-#window.show()
-#app.exec_()
-
-###############################################
-###############################################
-
-#class MplCanvas(FigureCanvasQTAgg):
-
-#    def __init__(self, parent=None, width=5, height=4, dpi=100):
-#        fig = Figure(figsize=(width, height), dpi=dpi)
-#        self.axes = fig.add_subplot(111)
-#        super(MplCanvas, self).__init__(fig)
 
 
-#class MainWindow(QtWidgets.QMainWindow):
 
-#    def __init__(self, *args, **kwargs):
-#        super(MainWindow, self).__init__(*args, **kwargs)
-
-#        # Create the maptlotlib FigureCanvas object,
-#        # which defines a single set of axes as self.axes.
-#        sc = MplCanvas(self, width=5, height=4, dpi=100)
-#        sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])
-#        self.setCentralWidget(sc)
-
-#        self.show()
-
-
-#app = QtWidgets.QApplication(sys.argv)
-#w = MainWindow()
-#app.exec_()
 
 # ------------------ MplWidget ------------------ 
 class MatplotlibCanvas(FigureCanvasQTAgg):
     def __init__(self,parent=None, dpi = 100):
         fig = Figure(dpi = dpi)
-        self.axes = fig.add_subplot(111)
+        self.axes =fig.add_subplot(111)
         super(MatplotlibCanvas,self).__init__(fig)
 
         fig.tight_layout()
@@ -130,6 +98,12 @@ class MainWidget(QWidget):
         print("preUpdate "+str(self.coef))
         self.update_graph()
 
+    def generate_sine_wave(self, freq, sample_rate, duration):
+        x = np.linspace(0, duration, sample_rate * duration, endpoint=False)
+        frequencies = x * freq
+        # 2pi because np.sin takes radians
+        y = np.sin((2 * np.pi) * frequencies)
+        return x, y
     def update_graph(self):
             print("update_graph "+str(self.coef))
             fs = 500
@@ -155,6 +129,9 @@ class MainWidget(QWidget):
             toolbar = Navi(canv,centralwidget)
             #toolbar.resize(200,100)
             toolbar.setFixedHeight(25)
+            #self.ui.horizontalLayout = None
+            if self.ui.horizontalLayout.count()>0:#preventing multiple toolbars
+                self.ui.horizontalLayout.itemAt(0).widget().deleteLater()
             self.ui.horizontalLayout.addWidget(toolbar)
             canv.axes.clear() 
             #self.ui.MplWidget.canvas.axes.plot( t ,  cosinus_signal )   #plot takes 2 parameters, 1 for x axis, 2 for y axis 
@@ -163,15 +140,17 @@ class MainWidget(QWidget):
             ss = 1 + np.sin(2* np.pi * tt)
             #x = np.linspace(-np.pi, np.pi, 100)
             #y = 2*np.sin(x)
-
+            
             #x = np.linspace(-5*np.pi,5*np.pi,100)
             #y = np.sin(x)/x
             print(str(self.coef)+' COEF')
+
             x = np.linspace(-np.pi*self.coef, np.pi*self.coef, 100)
-            y = 2*np.sin(x)
-            canv.axes.plot(x,y)
+            y = 2*np.cos(x)#↑
+            xx, yy = self.generate_sine_wave(2, 44100, 5)
+            canv.axes.plot(xx,yy)
             #self.ui.MplWidget.canvas.axes.plot(t, signal.square(2 * np.pi * 5 * t))
-            canv.axes.legend(('cosinus', 'sinus'), loc = 'upper right')
+            #canv.axes.legend(('cosinus', 'sinus'), loc = 'upper right')
             canv.axes.set_title(' Cosinus - Sinus Signals')
             #self.ui.MplWidget.canvas.axes.plot.axhline(y=0, color='k')
             #canv.axes.set_xlabel('X axis')
@@ -196,10 +175,10 @@ class MainWidget(QWidget):
             #canv.axes.axhline(color='red', lw=0.5)
             #canv.axes.axvline(color='green', lw=0.5)
 
-
-            canv.axes.xaxis.set_major_formatter(FuncFormatter(
-             lambda val,pos: '{:.0g}$\pi$'.format(val/np.pi) if val !=0 else '0'))
-            canv.axes.xaxis.set_major_locator(MultipleLocator(base=np.pi))
+            if self.ui.piCheck.isChecked():
+                canv.axes.xaxis.set_major_formatter(FuncFormatter(
+                 lambda val,pos: '{:.0g}$\pi$'.format(val/np.pi) if val !=0 else '0'))
+                canv.axes.xaxis.set_major_locator(MultipleLocator(base=np.pi))
             canv.axes.grid(True)
             canv.draw()
             canv.figure.tight_layout()

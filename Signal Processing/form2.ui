@@ -126,6 +126,22 @@
            <pointsize>10</pointsize>
           </font>
          </property>
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="piCheck">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string>Pi x</string>
+         </property>
+         <property name="tristate">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
        <item>
