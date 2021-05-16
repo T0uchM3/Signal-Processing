@@ -80,6 +80,7 @@ class MainWidget(QWidget):
         #self.ui.pushButton.clicked.connect(self.update_graph)
 
         self.ui.updateBtn.clicked.connect(self.preUpdate)
+        self.ui.custFunc.stateChanged.connect(self.customFunction)
 
         self.setWindowTitle("PySide2 & Matplotlib Example GUI")
 
@@ -91,6 +92,18 @@ class MainWidget(QWidget):
         #yaxis = np.array([4, 9])
         #self.ui.MplWidget.canvas.axes.plot(xaxis, yaxis)
         
+    def customFunction(self):
+        if self.ui.custFunc.isChecked():
+            self.ui.funcText.setEnabled(True)
+            self.ui.funcStyle.setEnabled(True)
+            self.ui.funcType.setEnabled(False)
+            #self.ui.periodSpin.setEnabled(False)
+        else:
+            self.ui.funcText.setEnabled(False)
+            self.ui.funcStyle.setEnabled(False)
+            self.ui.funcType.setEnabled(True)
+            #self.ui.periodSpin.setEnabled(True)
+
     def preUpdate(self):
        
         self.coef = self.ui.periodSpin.value()
@@ -113,7 +126,7 @@ class MainWidget(QWidget):
             t = np.linspace(0, 1, length_of_signal)
             #t = np.linspace(0, 1, 1000, endpoint=True)
             
-            #cosinus_signal  =  np.cos ( 2 * np.pi * f * t ) 
+            cosinus_signal  =  np.cos ( 2 * np.pi * f * t ) 
             #sinus_signal  =  np.sin ( 2 * np.pi * f * t )
 
             xaxis = np.array([2, 8])
@@ -145,10 +158,80 @@ class MainWidget(QWidget):
             #y = np.sin(x)/x
             print(str(self.coef)+' COEF')
 
-            x = np.linspace(-np.pi*self.coef, np.pi*self.coef, 100)
-            y = 2*np.cos(x)#↑
+            #x = np.linspace(-np.pi*self.coef, np.pi*self.coef, 1000)
+            #x =  np.linspace(np.pi, 3*np.pi, 1000)
+            #y = 1*np.cos(x)#↑(*amplitude)  
             xx, yy = self.generate_sine_wave(2, 44100, 5)
-            canv.axes.plot(xx,yy)
+            #txx = np.linspace(0, 1, 1000)
+            #txx = np.linspace(-np.pi*self.coef, np.pi*self.coef, 1000)
+            #txx = np.linspace(-1*self.coef, 1*self.coef, 1000, endpoint=True)
+
+
+            tString = self.ui.tTextField.text()
+            if tString.split(',')[0].find("pi")>=0:
+                if tString.split(',')[0][0:1]=="-":
+                    SampleStart = -np.pi
+                else:
+                    SampleStart = np.pi
+            else:
+                if tString.split(',')[0][0:1]=="-":
+                    SampleStart = -(int(tString.split(',')[0][1:len(tString.split(',')[0])]))
+                else:
+                    SampleStart = int(tString.split(',')[0])
+
+            if tString.split(',')[1].find("pi")>=0:
+
+                if tString.split(',')[1][0:1]=="-":
+                    SampleEnd = -np.pi
+                else:
+                    SampleEnd = np.pi
+            else:
+                if tString.split(',')[1][0:1]=="-":
+                    SampleEnd =  -(int(tString.split(',')[1][1:len(tString.split(',')[1])]))
+                else:
+                    SampleEnd = int(tString.split(',')[1])
+
+            SampleRate = int(tString.split(',')[2])
+            #print("ggggg",tString.split(',')[1].find("pi"))
+            x = np.linspace(SampleStart*self.coef, SampleEnd*self.coef, SampleRate)
+            #print(SampleStart,",",SampleEnd,",",SampleRate)
+            #print(tString.split(',')[1].find("pi"))
+            #print(tString.split(',')[2])
+
+
+            if(self.ui.funcType.currentText()=="Sin"):
+                y = 1*np.sin(x)
+            elif(self.ui.funcType.currentText()=="Cos"):
+                y = 1*np.cos(x)#↑(*amplitude)
+            else:
+                y = np.sinc(x)
+            #canv.axes.plot(xx,yy)
+            if not self.ui.custFunc.isChecked():
+                canv.axes.plot(x,y)
+            else:
+                funcString = self.ui.funcText.text()#A Cos ( B Pi C t )
+                piPos = funcString.find("pi")
+                cosPos = funcString.find("cos") 
+                sinPos = funcString.find("sin")
+                if cosPos>0:
+                    csPos = cosPos
+                if sinPos>0:
+                    csPos = sinPos
+                if piPos>0:
+                    funcA=int(funcString[0:csPos])
+                    funcB=int(funcString[csPos+4:piPos])
+                    funcC=int(funcString[piPos+2:len(funcString)-1])
+                    print(funcA," ",funcB, " ",funcC)
+                    #print(afterPi)
+                    if cosPos>0:
+                        canv.axes.plot(x,funcA*np.cos(funcB*np.pi*funcC*x))
+                    if sinPos>0:
+                        canv.axes.plot(txx,funcA*np.sin(funcB*np.pi*funcC*x))
+
+
+            #canv.axes.plot(txx,2*np.cos(2*np.pi*5*txx))
+            #canv.axes.plot(txx,2*np.cos(2*np.pi*5*txx))
+
             #self.ui.MplWidget.canvas.axes.plot(t, signal.square(2 * np.pi * 5 * t))
             #canv.axes.legend(('cosinus', 'sinus'), loc = 'upper right')
             canv.axes.set_title(' Cosinus - Sinus Signals')
@@ -167,18 +250,29 @@ class MainWidget(QWidget):
             canv.axes.xaxis.set_ticks_position('bottom')
             canv.axes.yaxis.set_ticks_position('left')
 
-            #canv.axes.set_xlim(-np.pi, np.pi)
+            
 
+            
             #canv.axes.set_ylim(bottom=0)
             #canv.axes.set_xlim(xmin=0)
+            startView = self.ui.startSpin.value()
+            endView = self.ui.endSpin.value()
+            startViewY = self.ui.yStartSpin.value()
+            endViewY = self.ui.yEndSpin.value()
+            canv.axes.set_ylim(startViewY,endViewY)
+            canv.axes.set_xlim(startView, endView)
 
             #canv.axes.axhline(color='red', lw=0.5)
             #canv.axes.axvline(color='green', lw=0.5)
+
 
             if self.ui.piCheck.isChecked():
                 canv.axes.xaxis.set_major_formatter(FuncFormatter(
                  lambda val,pos: '{:.0g}$\pi$'.format(val/np.pi) if val !=0 else '0'))
                 canv.axes.xaxis.set_major_locator(MultipleLocator(base=np.pi))
+
+            if self.ui.zMid.isChecked():
+                canv.axes.set_xlim(-np.pi, np.pi)
             canv.axes.grid(True)
             canv.draw()
             canv.figure.tight_layout()

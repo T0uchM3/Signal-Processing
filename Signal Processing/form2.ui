@@ -58,15 +58,98 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>8</number>
+       </property>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QCheckBox" name="custFunc">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
          <property name="text">
-          <string>PushButton</string>
+          <string>Enable custom functions</string>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="funcText">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>2cos(2pi5)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="funcStyle">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <item>
+          <property name="text">
+           <string>a Sin ( b Pi c t )</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>a Cos ( b Pi c t )</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="tLab">
+         <property name="minimumSize">
+          <size>
+           <width>18</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>13</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>t:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="tTextField">
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>-pi,pi,1000</string>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer name="horizontalSpacer">
@@ -99,10 +182,15 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBox">
+        <widget class="QComboBox" name="funcType">
          <item>
           <property name="text">
            <string>Sin</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>SinC</string>
           </property>
          </item>
          <item>
@@ -145,6 +233,84 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="zMid">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string>0 Mid</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Xstart</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="startSpin">
+         <property name="minimum">
+          <number>-99</number>
+         </property>
+         <property name="value">
+          <number>-6</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Xend</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="endSpin">
+         <property name="minimum">
+          <number>-99</number>
+         </property>
+         <property name="value">
+          <number>6</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Ystart</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="yStartSpin">
+         <property name="minimum">
+          <number>-99</number>
+         </property>
+         <property name="value">
+          <number>-2</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Yend</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="yEndSpin">
+         <property name="minimum">
+          <number>-99</number>
+         </property>
+         <property name="value">
+          <number>2</number>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="updateBtn">
          <property name="text">
           <string>update</string>
@@ -169,7 +335,7 @@
     </layout>
    </item>
    <item row="4" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
       <number>10</number>
      </property>
