@@ -12,11 +12,13 @@ from matplotlib.figure import Figure
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 from scipy import signal
 import matplotlib.pyplot as plot
-
+from numpy import fft as fft
 import  numpy  as  np 
 import  random
+import wave
 from PySide2.QtWidgets import QApplication
-
+import scipy.fftpack
+import scipy.io.wavfile
 
 
 
@@ -35,25 +37,14 @@ class MplWidget(QWidget):
         
         QWidget.__init__(self, parent)
         
-        #self.canvas = FigureCanvas(Figure())
         self.canvas = MatplotlibCanvas(self)
         
         vertical_layout = QVBoxLayout() 
         vertical_layout.addWidget(self.canvas)
-        #vertical_layout.addWidget(NavigationToolbar(self.canvas, self))
         
-        #self.canvas.axes = self.canvas.figure.add_subplot(111)
         self.setLayout(vertical_layout)
 
 
-
-
-        #self.canvas.figure.tight_layout()
-        #t = np.linspace(0, 1, 1000, endpoint=True)
-        #plot.plot(t, signal.square(2 * np.pi * 5 * t))
-        #plot.title('Sqaure wave - 5 Hz sampled at 1000 Hz /second')
-        #plot.xlabel('Time')
-        #plot.show()
 # ------------------ MainWidget ------------------
 class MainWidget(QWidget):
     coef = 0
@@ -73,36 +64,36 @@ class MainWidget(QWidget):
         global coef
         self.coef = 1
         print("MainWidget")
+        self.dropped = False
+        self.diracN = 0
         self.update_graph()
 
         designer_file.close()
 
-        #self.ui.pushButton.clicked.connect(self.update_graph)
-
         self.ui.updateBtn.clicked.connect(self.preUpdate)
         self.ui.custFunc.stateChanged.connect(self.customFunction)
+        self.ui.diracModifier.valueChanged.connect(self.diracChange)
 
         self.setWindowTitle("PySide2 & Matplotlib Example GUI")
 
         grid_layout = QGridLayout() 
         grid_layout.addWidget(self.ui) 
         self.setLayout(grid_layout)
-
-        #xaxis = np.array([2, 8])
-        #yaxis = np.array([4, 9])
-        #self.ui.MplWidget.canvas.axes.plot(xaxis, yaxis)
+        self.setAcceptDrops(True)
         
+    def diracChange(self):
+        self.diracN = int(self.ui.diracModifier.value())
+        self.update_graph()
+
     def customFunction(self):
         if self.ui.custFunc.isChecked():
             self.ui.funcText.setEnabled(True)
-            self.ui.funcStyle.setEnabled(True)
+            #self.ui.funcStyle.setEnabled(True)
             self.ui.funcType.setEnabled(False)
-            #self.ui.periodSpin.setEnabled(False)
         else:
             self.ui.funcText.setEnabled(False)
-            self.ui.funcStyle.setEnabled(False)
+            #self.ui.funcStyle.setEnabled(False)
             self.ui.funcType.setEnabled(True)
-            #self.ui.periodSpin.setEnabled(True)
 
     def preUpdate(self):
        
@@ -117,166 +108,240 @@ class MainWidget(QWidget):
         # 2pi because np.sin takes radians
         y = np.sin((2 * np.pi) * frequencies)
         return x, y
+    def dragEnterEvent(self, e):
+        """
+        This function will detect the drag enter event from the mouse on the main window
+        Like it open the window to accept file dropping
+        """
+        if e.mimeData().hasUrls:
+            e.accept()
+        else:
+            e.ignore()
+    def dropEvent(self,e):
+        """
+        This function will enable the drop file(s) directly on to the
+        main window. The file location will be stored in the self.filename
+        """
+        for url in e.mimeData().urls():
+            fname = str(url.toLocalFile())
+        self.filename = fname
+        print("PATH: ", self.filename)
+        self.dropped = True
+        self.update_graph()
+
     def update_graph(self):
-            print("update_graph "+str(self.coef))
             fs = 500
             f = random.randint(1, 100) 
             ts = 1/fs 
             length_of_signal = 100 
             t = np.linspace(0, 1, length_of_signal)
-            #t = np.linspace(0, 1, 1000, endpoint=True)
             
             cosinus_signal  =  np.cos ( 2 * np.pi * f * t ) 
-            #sinus_signal  =  np.sin ( 2 * np.pi * f * t )
 
             xaxis = np.array([2, 8])
             yaxis = np.array([4, 9])
             T=1
             sinSig = np.sin(2 *np.pi*t/T)
             rang = np.arange(0.0, 1.0, 0.01)
-            #plt.plot(xaxis, yaxis)
-            #plt.show()
             centralwidget = QtWidgets.QWidget(self)
             canv = MatplotlibCanvas(self)
             canv = self.ui.MplWidget.canvas
             toolbar = Navi(canv,centralwidget)
-            #toolbar.resize(200,100)
             toolbar.setFixedHeight(25)
-            #self.ui.horizontalLayout = None
-            if self.ui.horizontalLayout.count()>0:#preventing multiple toolbars
-                self.ui.horizontalLayout.itemAt(0).widget().deleteLater()
-            self.ui.horizontalLayout.addWidget(toolbar)
+            if self.ui.horizontalLayout.count()==0:
+                self.ui.horizontalLayout.addWidget(toolbar)
             canv.axes.clear() 
-            #self.ui.MplWidget.canvas.axes.plot( t ,  cosinus_signal )   #plot takes 2 parameters, 1 for x axis, 2 for y axis 
-            #self.ui.MplWidget.canvas.axes.plot( t ,  sinus_signal ) 
-            tt = np.arange(0.0,2.0,0.01)
-            ss = 1 + np.sin(2* np.pi * tt)
-            #x = np.linspace(-np.pi, np.pi, 100)
-            #y = 2*np.sin(x)
+
+
+            if self.dropped:
+
+                with wave.open('choral2.wav','r') as wav_file:
+                    #Extract Raw Audio from Wav File
+                    signal = wav_file.readframes(-1)
+                    signal = np.frombuffer(signal, dtype=np.int16)
+
+                    # If Stereo
+                    if signal_wave.getnchannels() == 2:
+                        #Split the data into channels 
+                        channels = [[] for channel in range(wav_file.getnchannels())]
+                        for index, datum in enumerate(signal):
+                            channels[index%len(channels)].append(datum)
+
+                        #Get time from indices
+                        fs = wav_file.getframerate()
+                        Time=np.linspace(0, len(signal)//len(channels)//fs, num=len(signal)//len(channels))
+
+                        for channel in channels:
+                            canv.axes.plot(Time,channel)
+                    else:
+                        canv.axes.plot(signal)
+                    canv.axes.grid(True)
+                    canv.draw()
+                    canv.figure.tight_layout()
+            else:
+                tt = np.arange(0.0,2.0,0.01)
+                ss = 1 + np.sin(2* np.pi * tt)
             
-            #x = np.linspace(-5*np.pi,5*np.pi,100)
-            #y = np.sin(x)/x
-            print(str(self.coef)+' COEF')
+                print(str(self.coef)+' COEF')
 
-            #x = np.linspace(-np.pi*self.coef, np.pi*self.coef, 1000)
-            #x =  np.linspace(np.pi, 3*np.pi, 1000)
-            #y = 1*np.cos(x)#↑(*amplitude)  
-            xx, yy = self.generate_sine_wave(2, 44100, 5)
-            #txx = np.linspace(0, 1, 1000)
-            #txx = np.linspace(-np.pi*self.coef, np.pi*self.coef, 1000)
-            #txx = np.linspace(-1*self.coef, 1*self.coef, 1000, endpoint=True)
+                xx, yy = self.generate_sine_wave(2, 44100, 5)
 
 
-            tString = self.ui.tTextField.text()
-            if tString.split(',')[0].find("pi")>=0:
-                if tString.split(',')[0][0:1]=="-":
-                    SampleStart = -np.pi
+                tString = self.ui.tTextField.text()
+                if tString.split(',')[0].find("pi")>=0:
+                    if tString.split(',')[0][0:1]=="-":
+                        SampleStart = -np.pi
+                    else:
+                        SampleStart = np.pi
                 else:
-                    SampleStart = np.pi
-            else:
-                if tString.split(',')[0][0:1]=="-":
-                    SampleStart = -(int(tString.split(',')[0][1:len(tString.split(',')[0])]))
+                    if tString.split(',')[0][0:1]=="-":
+                        SampleStart = -(int(tString.split(',')[0][1:len(tString.split(',')[0])]))
+                    else:
+                        SampleStart = int(tString.split(',')[0])
+
+                if tString.split(',')[1].find("pi")>=0:
+
+                    if tString.split(',')[1][0:1]=="-":
+                        SampleEnd = -np.pi
+                    else:
+                        SampleEnd = np.pi
                 else:
-                    SampleStart = int(tString.split(',')[0])
+                    if tString.split(',')[1][0:1]=="-":
+                        SampleEnd =  -(int(tString.split(',')[1][1:len(tString.split(',')[1])]))
+                    else:
+                        SampleEnd = int(tString.split(',')[1])
 
-            if tString.split(',')[1].find("pi")>=0:
+                SampleRate = float(tString.split(',')[2])
+                x = np.linspace(SampleStart*self.coef, SampleEnd*self.coef, 1000)
 
-                if tString.split(',')[1][0:1]=="-":
-                    SampleEnd = -np.pi
+                #Known functions
+                if(self.ui.funcType.currentText()=="Sin"):
+                    y = 1*np.sin(x)
+                elif(self.ui.funcType.currentText()=="Cos"):
+                    y = 1*np.cos(x)#↑(*amplitude)
                 else:
-                    SampleEnd = np.pi
-            else:
-                if tString.split(',')[1][0:1]=="-":
-                    SampleEnd =  -(int(tString.split(',')[1][1:len(tString.split(',')[1])]))
-                else:
-                    SampleEnd = int(tString.split(',')[1])
+                    y = np.sinc(x)
+                if not self.ui.custFunc.isChecked() and not self.ui.diracComb.isChecked():
+                    canv.axes.plot(x,y)
 
-            SampleRate = int(tString.split(',')[2])
-            #print("ggggg",tString.split(',')[1].find("pi"))
-            x = np.linspace(SampleStart*self.coef, SampleEnd*self.coef, SampleRate)
-            #print(SampleStart,",",SampleEnd,",",SampleRate)
-            #print(tString.split(',')[1].find("pi"))
-            #print(tString.split(',')[2])
-
-
-            if(self.ui.funcType.currentText()=="Sin"):
-                y = 1*np.sin(x)
-            elif(self.ui.funcType.currentText()=="Cos"):
-                y = 1*np.cos(x)#↑(*amplitude)
-            else:
-                y = np.sinc(x)
-            #canv.axes.plot(xx,yy)
-            if not self.ui.custFunc.isChecked():
-                canv.axes.plot(x,y)
-            else:
-                funcString = self.ui.funcText.text()#A Cos ( B Pi C t )
-                piPos = funcString.find("pi")
-                cosPos = funcString.find("cos") 
-                sinPos = funcString.find("sin")
-                if cosPos>0:
-                    csPos = cosPos
-                if sinPos>0:
-                    csPos = sinPos
-                if piPos>0:
-                    funcA=int(funcString[0:csPos])
-                    funcB=int(funcString[csPos+4:piPos])
-                    funcC=int(funcString[piPos+2:len(funcString)-1])
-                    print(funcA," ",funcB, " ",funcC)
-                    #print(afterPi)
+                if self.ui.custFunc.isChecked():# and not self.ui.diracComb.isChecked()
+                    funcString = self.ui.funcText.text()#A Cos ( B Pi C t/D )
+                    piPos = funcString.find("pi")
+                    cosPos = funcString.find("cos") 
+                    sinPos = funcString.find("sin")
+                    starPos = funcString.find("*")
+                    sincPos = funcString.find("sinc")
                     if cosPos>0:
-                        canv.axes.plot(x,funcA*np.cos(funcB*np.pi*funcC*x))
+                        csPos = cosPos
                     if sinPos>0:
-                        canv.axes.plot(txx,funcA*np.sin(funcB*np.pi*funcC*x))
+                        csPos = sinPos
+                    if sincPos>0:
+                        scPos = sincPos
+                    if piPos>0:
+                        funcA=int(funcString[0:csPos])
+                        if sincPos>0:
+                            funcB=int(funcString[csPos+5:piPos])
+                        else:
+                            funcB=int(funcString[csPos+4:piPos])
+
+                        if self.ui.diracComb.isChecked():
+                            if starPos < 0:
+                                funcD = 2
+                            else: 
+                                funcD=int(funcString[starPos+1:len(funcString)-1])
+                            funcC=int(funcString[piPos+2:starPos])
+                            
+                        else:
+                            funcC=int(funcString[piPos+2:len(funcString)-1])
+                            funcD=2
+
+                        
+                        print(funcA," ",funcB, " ",funcC)
+                        #print(afterPi)
+                        if not self.ui.diracComb.isChecked():
+                            if cosPos>0:
+                                canv.axes.clear()#obviously the .clear() above is just chilling 
+                                canv.axes.plot(x,funcA*np.cos(funcB*np.pi*funcC*x))
+                            if sinPos>0:
+                                canv.axes.clear()
+                                canv.axes.plot(x,funcA*np.sin(funcB*np.pi*funcC*x))
+                            if sincPos>0:
+                                canv.axes.clear()
+                                canv.axes.plot(x,funcA*np.sinc(funcB*np.pi*funcC*x))
+
+                        if self.ui.diracComb.isChecked():
+                            """          DIRAC            """
+                            N=self.diracN
+                            T = funcD  # time-distance between diracs
+                            Fs = 10000 # sampling frequency
+                            t = np.arange(-1*self.coef, 1*self.coef, SampleRate)
+                            sigSum = np.ones_like(t)
+                            for n in range(1,N+1):
+                                if cosPos > 0:
+                                    part = funcA*np.cos(funcB*np.pi*funcC*n*t/T)
+                                if sinPos > 0:
+                                    part = funcA*np.sin(funcB*np.pi*funcC*n*t/T)
+                                if sincPos > 0:
+                                    part = funcA*np.sinc(funcB*np.pi*funcC*n*t/T)
+                                sigSum = sigSum + part
+                                if n < 50:
+                                    canv.axes.plot(t, part, 'b-')
+                            canv.axes.clear()
+                            canv.axes.plot(t, sigSum, 'r-', lw=2, zorder=-1)
+                            """          DIRAC END           """
+                        if self.ui.FFTBox.isChecked():
+                            """          FFT            """
+                            canv.axes.clear()
+                            print("FFFT")
+                            N = 600
+                            T = 1.0 / 800.0
+                            if cosPos>0:
+                                y=funcA*np.cos(funcB*np.pi*funcC*x)
+                            if sinPos>0:
+                                y=funcA*np.sin(funcB*np.pi*funcC*x)
+                            if sincPos>0:
+                                y=funcA*np.sinc(funcB*np.pi*funcC*x)
+                            yf = scipy.fftpack.fft(y)
+                            xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
+                            canv.axes.plot(xf, 2.0/N * np.abs(yf[:N//2]))
+                        """          FFT END           """
 
 
-            #canv.axes.plot(txx,2*np.cos(2*np.pi*5*txx))
-            #canv.axes.plot(txx,2*np.cos(2*np.pi*5*txx))
+                #n = np.arange(50)
+                #canv.axes.stem(np.cos(2*np.pi*1/2*n))
 
-            #self.ui.MplWidget.canvas.axes.plot(t, signal.square(2 * np.pi * 5 * t))
-            #canv.axes.legend(('cosinus', 'sinus'), loc = 'upper right')
-            canv.axes.set_title(' Cosinus - Sinus Signals')
-            #self.ui.MplWidget.canvas.axes.plot.axhline(y=0, color='k')
-            #canv.axes.set_xlabel('X axis')
-            #canv.axes.set_ylabel('Y axis')
+                if not self.ui.diracComb.isChecked():
+                    canv.axes.set_title(' Cosinus - Sinus Signals')
             
-            canv.axes.spines['left'].set_position('center')
-            canv.axes.spines['bottom'].set_position('center')
+                    canv.axes.spines['left'].set_position('center')
+                    canv.axes.spines['bottom'].set_position('center')
 
-            # Eliminate upper and right axes
-            canv.axes.spines['right'].set_color('none')
-            canv.axes.spines['top'].set_color('none')
+                    # Eliminate upper and right axes
+                    canv.axes.spines['right'].set_color('none')
+                    canv.axes.spines['top'].set_color('none')
 
-            # Show ticks in the left and lower axes only
-            canv.axes.xaxis.set_ticks_position('bottom')
-            canv.axes.yaxis.set_ticks_position('left')
-
+                    # Show ticks in the left and lower axes only
+                    canv.axes.xaxis.set_ticks_position('bottom')
+                    canv.axes.yaxis.set_ticks_position('left')
             
+                #startView = self.ui.startSpin.value()
+                #endView = self.ui.endSpin.value()
+                #startViewY = self.ui.yStartSpin.value()
+                #endViewY = self.ui.yEndSpin.value()
+                #canv.axes.set_ylim(startViewY,endViewY)
+                #canv.axes.set_xlim(startView, endView)
 
-            
-            #canv.axes.set_ylim(bottom=0)
-            #canv.axes.set_xlim(xmin=0)
-            startView = self.ui.startSpin.value()
-            endView = self.ui.endSpin.value()
-            startViewY = self.ui.yStartSpin.value()
-            endViewY = self.ui.yEndSpin.value()
-            canv.axes.set_ylim(startViewY,endViewY)
-            canv.axes.set_xlim(startView, endView)
-
-            #canv.axes.axhline(color='red', lw=0.5)
-            #canv.axes.axvline(color='green', lw=0.5)
-
-
-            if self.ui.piCheck.isChecked():
-                canv.axes.xaxis.set_major_formatter(FuncFormatter(
-                 lambda val,pos: '{:.0g}$\pi$'.format(val/np.pi) if val !=0 else '0'))
-                canv.axes.xaxis.set_major_locator(MultipleLocator(base=np.pi))
+                if self.ui.piCheck.isChecked():
+                    canv.axes.xaxis.set_major_formatter(FuncFormatter(
+                     lambda val,pos: '{:.0g}$\pi$'.format(val/np.pi) if val !=0 else '0'))
+                    canv.axes.xaxis.set_major_locator(MultipleLocator(base=np.pi))
 
             if self.ui.zMid.isChecked():
                 canv.axes.set_xlim(-np.pi, np.pi)
             canv.axes.grid(True)
+            print("reached")
             canv.draw()
             canv.figure.tight_layout()
-            
 
 
 app = QApplication([]) 
