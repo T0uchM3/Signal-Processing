@@ -19,8 +19,11 @@ import wave
 from PySide2.QtWidgets import QApplication
 import scipy.fftpack
 import scipy.io.wavfile
-
-
+import scipy.integrate as integrate
+from scipy.integrate import quad
+import scipy.special as special
+from sympy import *
+from sympy import inverse_fourier_transform, exp, sqrt, pi
 
 # ------------------ MplWidget ------------------ 
 class MatplotlibCanvas(FigureCanvasQTAgg):
@@ -66,6 +69,7 @@ class MainWidget(QWidget):
         print("MainWidget")
         self.dropped = False
         self.diracN = 0
+        self.selectedFunc = ""
         self.update_graph()
 
         designer_file.close()
@@ -73,6 +77,7 @@ class MainWidget(QWidget):
         self.ui.updateBtn.clicked.connect(self.preUpdate)
         self.ui.custFunc.stateChanged.connect(self.customFunction)
         self.ui.diracModifier.valueChanged.connect(self.diracChange)
+        self.ui.calFunc.currentTextChanged.connect(self.calculFunction)
 
         self.setWindowTitle("PySide2 & Matplotlib Example GUI")
 
@@ -80,7 +85,10 @@ class MainWidget(QWidget):
         grid_layout.addWidget(self.ui) 
         self.setLayout(grid_layout)
         self.setAcceptDrops(True)
-        
+       
+    def calculFunction(self):
+        self.selectedFunc= self.ui.calFunc.currentText()
+        self.update_graph()
     def diracChange(self):
         self.diracN = int(self.ui.diracModifier.value())
         self.update_graph()
@@ -134,14 +142,14 @@ class MainWidget(QWidget):
             f = random.randint(1, 100) 
             ts = 1/fs 
             length_of_signal = 100 
-            t = np.linspace(0, 1, length_of_signal)
+            #t = np.linspace(0, 1, length_of_signal)
             
-            cosinus_signal  =  np.cos ( 2 * np.pi * f * t ) 
+            #cosinus_signal  =  np.cos ( 2 * np.pi * f * t ) 
 
             xaxis = np.array([2, 8])
             yaxis = np.array([4, 9])
-            T=1
-            sinSig = np.sin(2 *np.pi*t/T)
+            #T=1
+            #sinSig = np.sin(2 *np.pi*t/T)
             rang = np.arange(0.0, 1.0, 0.01)
             centralwidget = QtWidgets.QWidget(self)
             canv = MatplotlibCanvas(self)
@@ -151,6 +159,8 @@ class MainWidget(QWidget):
             if self.ui.horizontalLayout.count()==0:
                 self.ui.horizontalLayout.addWidget(toolbar)
             canv.axes.clear() 
+
+######test
 
 
             if self.dropped:
@@ -223,14 +233,16 @@ class MainWidget(QWidget):
                     y = np.sinc(x)
                 if not self.ui.custFunc.isChecked() and not self.ui.diracComb.isChecked():
                     canv.axes.plot(x,y)
-
+                    
+                #custom functions
                 if self.ui.custFunc.isChecked():# and not self.ui.diracComb.isChecked()
                     funcString = self.ui.funcText.text()#A Cos ( B Pi C t/D )
                     piPos = funcString.find("pi")
-                    cosPos = funcString.find("cos") 
+                    cosPos = funcString.find("cos")
                     sinPos = funcString.find("sin")
                     starPos = funcString.find("*")
                     sincPos = funcString.find("sinc")
+                    plusPos = funcString.find("+")
                     if cosPos>0:
                         csPos = cosPos
                     if sinPos>0:
@@ -238,12 +250,18 @@ class MainWidget(QWidget):
                     if sincPos>0:
                         scPos = sincPos
                     if piPos>0:
-                        funcA=int(funcString[0:csPos])
+                        if plusPos > 0:
+                            func0=int(funcString[0:plusPos])
+                        else:
+                            func0=0
+                        print("func0 ",func0)
+                        funcA=int(funcString[plusPos+1:csPos])
+                        print("funcA ",funcA)
                         if sincPos>0:
                             funcB=int(funcString[csPos+5:piPos])
                         else:
                             funcB=int(funcString[csPos+4:piPos])
-
+                            
                         if self.ui.diracComb.isChecked():
                             if starPos < 0:
                                 funcD = 2
@@ -254,20 +272,28 @@ class MainWidget(QWidget):
                         else:
                             funcC=int(funcString[piPos+2:len(funcString)-1])
                             funcD=2
-
+                        
                         
                         print(funcA," ",funcB, " ",funcC)
                         #print(afterPi)
                         if not self.ui.diracComb.isChecked():
+                            T=Symbol('T')
+                            t=Symbol('t')
+                            f0 = 1/T
                             if cosPos>0:
                                 canv.axes.clear()#obviously the .clear() above is just chilling 
-                                canv.axes.plot(x,funcA*np.cos(funcB*np.pi*funcC*x))
+                                canv.axes.plot(x,func0+funcA*np.cos(funcB*np.pi*funcC*x))
+                                if self.selectedFunc=="Moyenne":
+                                    func=(func0+funcA*cos(funcB*pi*f0*t))
+                                    #func=(b0+b2*sin(9*pi*f0*t))**2
+                                    result=simplify(1/T*(integrate(func, (t,0,T))))
+                                    self.ui.calResult.setText(str(result))
                             if sinPos>0:
                                 canv.axes.clear()
-                                canv.axes.plot(x,funcA*np.sin(funcB*np.pi*funcC*x))
+                                canv.axes.plot(x,func0+funcA*np.sin(funcB*np.pi*funcC*x))
                             if sincPos>0:
                                 canv.axes.clear()
-                                canv.axes.plot(x,funcA*np.sinc(funcB*np.pi*funcC*x))
+                                canv.axes.plot(x,func0+funcA*np.sinc(funcB*np.pi*funcC*x))
 
                         if self.ui.diracComb.isChecked():
                             """          DIRAC            """
@@ -290,21 +316,21 @@ class MainWidget(QWidget):
                             canv.axes.plot(t, sigSum, 'r-', lw=2, zorder=-1)
                             """          DIRAC END           """
                         if self.ui.FFTBox.isChecked():
-                            """          FFT            """
-                            canv.axes.clear()
-                            print("FFFT")
-                            N = 600
-                            T = 1.0 / 800.0
+                            """          FT            """
                             if cosPos>0:
                                 y=funcA*np.cos(funcB*np.pi*funcC*x)
                             if sinPos>0:
                                 y=funcA*np.sin(funcB*np.pi*funcC*x)
                             if sincPos>0:
                                 y=funcA*np.sinc(funcB*np.pi*funcC*x)
-                            yf = scipy.fftpack.fft(y)
-                            xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
-                            canv.axes.plot(xf, 2.0/N * np.abs(yf[:N//2]))
-                        """          FFT END           """
+                            # fourier transform
+                            f = np.fft.fft(y)
+                            # sample frequencies
+                            freq = np.fft.fftfreq(len(y), d=x[1]-x[0])
+                            canv.axes.clear()
+                            canv.axes.plot(freq, abs(f)**2)
+
+                        """          FT END           """
 
 
                 #n = np.arange(50)
