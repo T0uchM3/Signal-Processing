@@ -91,8 +91,13 @@
            <pointsize>11</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string>xcos(yPI)
+z+xsin(yPI)
+z-xsinc(yPI)</string>
+         </property>
          <property name="text">
-          <string>2cos(2pi5)</string>
+          <string>2cos(2pi)</string>
          </property>
         </widget>
        </item>
@@ -121,8 +126,20 @@
            <pointsize>11</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string/>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
          <property name="text">
           <string>-pi,pi,1000</string>
+         </property>
+         <property name="placeholderText">
+          <string/>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -138,6 +155,11 @@
            <string>Moyenne</string>
           </property>
          </item>
+         <item>
+          <property name="text">
+           <string>Puissance</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
@@ -147,6 +169,21 @@
            <width>200</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="toolTip">
+          <string/>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="placeholderText">
+          <string/>
+         </property>
+         <property name="cursorMoveStyle">
+          <enum>Qt::LogicalMoveStyle</enum>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -187,6 +224,12 @@
            <height>0</height>
           </size>
          </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>56</height>
+          </size>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -205,15 +248,21 @@
          <widget class="QWidget" name="scrollAreaWidgetContents">
           <property name="geometry">
            <rect>
-            <x>0</x>
+            <x>-46</x>
             <y>0</y>
-            <width>970</width>
-            <height>52</height>
+            <width>824</width>
+            <height>37</height>
            </rect>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <property name="spacing">
             <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
            </property>
            <item>
             <widget class="QLabel" name="label">
@@ -239,6 +288,11 @@
                <string>Cos</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>Carré</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item>
@@ -258,18 +312,32 @@
                <pointsize>10</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Period of a function
+ex: 2pi, 3pi..</string>
+             </property>
              <property name="value">
               <number>1</number>
              </property>
             </widget>
            </item>
            <item>
+            <widget class="Line" name="line_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QCheckBox" name="piCheck">
+             <property name="toolTip">
+              <string>Set the x axis to periodic units</string>
+             </property>
              <property name="layoutDirection">
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>Pi x</string>
+              <string>Pi x::</string>
              </property>
              <property name="tristate">
               <bool>false</bool>
@@ -277,119 +345,83 @@
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="zMid">
+            <widget class="Line" name="line_4">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="dropped">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="layoutDirection">
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>0 Mid</string>
+              <string>Dropped::</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="FFTBox">
+            <widget class="Line" name="line_5">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="FTBox">
+             <property name="toolTip">
+              <string>Fourier Transform</string>
+             </property>
              <property name="layoutDirection">
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>FFT</string>
+              <string>FT::</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Xstart::</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="startSpin">
-             <property name="minimum">
-              <number>-99</number>
-             </property>
-             <property name="value">
-              <number>-6</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Xend::</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="endSpin">
-             <property name="minimum">
-              <number>-99</number>
-             </property>
-             <property name="value">
-              <number>6</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Ystart::</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="yStartSpin">
-             <property name="minimum">
-              <number>-99</number>
-             </property>
-             <property name="value">
-              <number>-2</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Yend::</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="yEndSpin">
-             <property name="minimum">
-              <number>-99</number>
-             </property>
-             <property name="value">
-              <number>2</number>
+            <widget class="Line" name="line_6">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QCheckBox" name="diracComb">
+             <property name="toolTip">
+              <string>Dirac comb
+</string>
+             </property>
              <property name="layoutDirection">
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>Dirac comb</string>
+              <string>Peigne de Dirac::</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Line" name="line_7">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_7">
+             <property name="toolTip">
+              <string>First N terms of the series</string>
+             </property>
              <property name="text">
-              <string>Time distance</string>
+              <string>N</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -411,19 +443,22 @@
             </widget>
            </item>
            <item>
-            <widget class="Line" name="line_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="checkBox">
+            <widget class="QCheckBox" name="echant">
              <property name="layoutDirection">
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>Specter</string>
+              <string>signal échantillonné</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="spectrogram">
+             <property name="layoutDirection">
+              <enum>Qt::RightToLeft</enum>
+             </property>
+             <property name="text">
+              <string>Spectrogram</string>
              </property>
             </widget>
            </item>
@@ -433,6 +468,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="updateBtn">
+         <property name="toolTip">
+          <string/>
+         </property>
+         <property name="toolTipDuration">
+          <number>1</number>
+         </property>
          <property name="text">
           <string>update</string>
          </property>
@@ -474,6 +515,9 @@
      </property>
      <property name="acceptDrops">
       <bool>true</bool>
+     </property>
+     <property name="toolTip">
+      <string/>
      </property>
     </widget>
    </item>
