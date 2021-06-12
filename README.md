@@ -1,2 +1,6 @@
 # Signal-Processing
-Using Pyside with Matplotlib for a small signal processing program
+Using Pyside along Matplotlib for a basic mathematic signal processing program.
+
+Matplotlib canvas integrated into Pyside (.ui) as a custom widget.
+
+<img src="https://github.com/T0uchM3/Signal-Processing/blob/master/Pics/mainWindow.png">
