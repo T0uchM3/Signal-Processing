@@ -364,3 +364,7 @@ FodyWeavers.xsd
 Signal Processing/test\.py
 
 Signal Processing/Signal_Processing\.spec
+
+Signal Processing/form3\.ui
+
+Signal Processing/form2\.ui

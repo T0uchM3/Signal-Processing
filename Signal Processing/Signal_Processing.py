@@ -26,9 +26,8 @@ import scipy.special as special
 from scipy import signal
 from sympy import *
 from sympy import inverse_fourier_transform, exp, sqrt, pi, fourier_transform
-#from PySide2.QtXml import QDomNode
+from PySide2.QtXml import QDomNode
 
-# ------------------ MplWidget ------------------
 class MatplotlibCanvas(FigureCanvasQTAgg):
     def __init__(self,parent=None, dpi=100):
         fig = Figure(dpi = dpi)
@@ -37,6 +36,7 @@ class MatplotlibCanvas(FigureCanvasQTAgg):
 
         fig.tight_layout()
 
+# ------------------ MplWidget ------------------
 class MplWidget(QWidget):
     
     def __init__(self, parent=None):
@@ -57,12 +57,11 @@ class MainWidget(QWidget):
     resultM = ""
     resultP = ""
     def __init__(self):
-        
         QWidget.__init__(self)
 
         full_path = os.path.realpath(__file__)
         path, filename = os.path.split(full_path)
-        designer_file = QFile(path + "\\form2.ui")
+        designer_file = QFile(path + "\\form.ui")
         designer_file.open(QFile.ReadOnly)
 
         loader = QUiLoader()
@@ -71,7 +70,6 @@ class MainWidget(QWidget):
 
         global coef
         self.coef = 1
-        print("MainWidget")
         self.dropped = False
         self.diracN = 0
         self.selectedFunc = ""
@@ -97,11 +95,6 @@ class MainWidget(QWidget):
             self.ui.dropped.setEnabled(False)
     def calculFunction(self):
         self.selectedFunc = self.ui.calFunc.currentText()
-        #if self.ui.calFunc.currentText()=="Moyenne":
-        #    self.ui.calResult.setText(str(self.resultM))
-        #if self.ui.calFunc.currentText()=="Puissance":
-        #    self.ui.calResult.setText(str(self.resultP))
-        #self.update_graph()
     def diracChange(self):
         if self.ui.diracComb.isChecked():
             self.diracN = int(self.ui.diracModifier.value())
@@ -110,12 +103,10 @@ class MainWidget(QWidget):
     def customFunction(self):
         if self.ui.custFunc.isChecked():
             self.ui.funcText.setEnabled(True)
-            #self.ui.funcStyle.setEnabled(True)
             self.ui.funcType.setEnabled(False)
             self.ui.calFunc.setEnabled(True)
         else:
             self.ui.funcText.setEnabled(False)
-            #self.ui.funcStyle.setEnabled(False)
             self.ui.funcType.setEnabled(True)
             self.ui.calFunc.setEnabled(False)
 
@@ -149,26 +140,12 @@ class MainWidget(QWidget):
         for url in e.mimeData().urls():
             fname = str(url.toLocalFile())
         self.filename = fname
-        #print("PATH: ", self.filename)
         self.dropped = True
         self.ui.dropped.setEnabled(True)
         self.ui.dropped.setChecked(True)
         self.update_graph()
 
     def update_graph(self):
-            fs = 500
-            f = random.randint(1, 100) 
-            ts = 1 / fs 
-            length_of_signal = 100 
-            #t = np.linspace(0, 1, length_of_signal)
-            
-            #cosinus_signal = np.cos ( 2 * np.pi * f * t )
-
-            xaxis = np.array([2, 8])
-            yaxis = np.array([4, 9])
-            #T=1
-            #sinSig = np.sin(2 *np.pi*t/T)
-            rang = np.arange(0.0, 1.0, 0.01)
             centralwidget = QtWidgets.QWidget(self)
             canv = MatplotlibCanvas(self)
             canv = self.ui.MplWidget.canvas
@@ -179,7 +156,6 @@ class MainWidget(QWidget):
             canv.axes.clear() 
             canv.axes.set_xlabel('Time')
             canv.axes.set_ylabel('Amplitude')
-######test
 
 
             if self.dropped and self.ui.dropped.isChecked():
@@ -242,7 +218,6 @@ class MainWidget(QWidget):
                     else:
                         SampleEnd = int(tString.split(',')[1])
 
-                #SampleRate = float(tString.split(',')[2])
                 SampleRate = int(tString.split(',')[2])
                 x = np.linspace(SampleStart * self.coef, SampleEnd * self.coef, SampleRate)
 
@@ -295,9 +270,7 @@ class MainWidget(QWidget):
                             func0 = int(funcString[0:opPos])
                         else:
                             func0 = 0
-                        #print("func0 ",func0)
                         funcA = int(funcString[opPos + 1:csPos])
-                        #print("funcA ",funcA)
                         if sincPos > 0:
                             funcB = int(funcString[csPos + 5:piPos])
                         else:
@@ -308,26 +281,19 @@ class MainWidget(QWidget):
                                 funcD = 2
                             else: 
                                 funcD = int(funcString[starPos + 1:len(funcString) - 1])
-                            #funcC=int(funcString[piPos+2:starPos])
                             
                         else:
-                            #funcC=int(funcString[piPos+2:len(funcString)-1])
                             funcD = 2
                         
                         
                         print(funcA," ",funcB, " ",funcD)
-                        #print(afterPi)
                         if not self.ui.diracComb.isChecked() and not self.ui.FTBox.isChecked() and not self.ui.echant.isChecked():
-                            print("*************normal")
                             T = Symbol('T')
                             t = Symbol('t')
                             f0 = 1 / T
                             if cosPos > 0:
-                                #x = np.linspace(-2*self.coef, 2*self.coef, 64)
-                                #y = 1*np.sin(2*x)
                                 canv.axes.clear()#obviously the .clear() above is just chilling
                                 canv.axes.plot(x,func0 + cata * funcA * np.cos(funcB * np.pi * x))
-                                #canv.axes.stem(x,func0+cata*funcA*np.cos(funcB*np.pi*x));
                                 if self.selectedFunc == "Moyenne":
                                     func = (func0 + cata * funcA * cos(funcB * pi * f0 * t))
                                     self.result = simplify(1 / T * (integrate(func, (t,0,T))))
@@ -361,7 +327,6 @@ class MainWidget(QWidget):
 
                         if self.ui.diracComb.isChecked():
                             """          DIRAC            """
-                            print("*************diraca")
                             N = self.diracN
                             T = funcD  # time-distance between diracs
                             Fs = 10000 # sampling frequency
@@ -369,7 +334,6 @@ class MainWidget(QWidget):
                             sigSum = np.ones_like(t)
                             for n in range(1,N + 1):
                                 if cosPos > 0:
-                                    #part = funcA*np.cos(funcB*np.pi*n*t/T)
                                     part = funcA * np.cos(funcB * np.pi * n * t / T)
                                 if sinPos > 0:
                                     part = funcA * np.sin(funcB * np.pi * n * t / T)
@@ -378,14 +342,12 @@ class MainWidget(QWidget):
                                 sigSum = sigSum + part
                                 if n < 50:
                                     canv.axes.plot(t, part, 'b-')
-                            #canv.axes.clear()
                             canv.axes.set_xlabel('t')
                             canv.axes.set_ylabel('CT(t)')
                             canv.axes.plot(t, sigSum, 'r-', lw=2, zorder=-1)
                             """          DIRAC END           """
                         if self.ui.FTBox.isChecked():
                             """          FT            """
-                            print("*************FOUREIR")
                             if cosPos > 0:
                                 y = funcA * np.cos(funcB * np.pi * x)
                             if sinPos > 0:
@@ -403,7 +365,6 @@ class MainWidget(QWidget):
                         """          FT END           """
                         if self.ui.echant.isChecked():
                             """    echantionage??    """
-                            print("*************enchat")
                             if cosPos > 0:
                                 y = func0 + cata * funcA * np.cos(funcB * np.pi * x)
                             if sinPos > 0:
@@ -414,39 +375,11 @@ class MainWidget(QWidget):
                             canv.axes.stem(x,y)
 
 
-
-                #n = np.arange(50)
-                #canv.axes.stem(np.cos(2*np.pi*1/2*n))
-
-                #if not self.ui.diracComb.isChecked():
-                #    canv.axes.set_title(' Cosinus - Sinus Signals')
-            
-                    #canv.axes.spines['left'].set_position('center')
-                    #canv.axes.spines['bottom'].set_position('center')
-
-                    ## Eliminate upper and right axes
-                    #canv.axes.spines['right'].set_color('none')
-                    #canv.axes.spines['top'].set_color('none')
-
-                    ## Show ticks in the left and lower axes only
-                    #canv.axes.xaxis.set_ticks_position('bottom')
-                    #canv.axes.yaxis.set_ticks_position('left')
-            
-                #startView = self.ui.startSpin.value()
-                #endView = self.ui.endSpin.value()
-                #startViewY = self.ui.yStartSpin.value()
-                #endViewY = self.ui.yEndSpin.value()
-                #canv.axes.set_ylim(startViewY,endViewY)
-                #canv.axes.set_xlim(startView, endView)
-
                 if self.ui.piCheck.isChecked():
                     canv.axes.xaxis.set_major_formatter(FuncFormatter(lambda val,pos: '{:.0g}$\pi$'.format(val / np.pi) if val != 0 else '0'))
                     canv.axes.xaxis.set_major_locator(MultipleLocator(base=np.pi))
             
-            #if self.ui.zMid.isChecked():
-            #    canv.axes.set_xlim(-np.pi, np.pi)
             canv.axes.grid(True)
-            print("reached")
             canv.draw()
             canv.figure.tight_layout()
 
